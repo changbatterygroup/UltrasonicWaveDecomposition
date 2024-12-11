@@ -8,8 +8,14 @@ import os.path
 
 
 #data_dir = "/Users/michael/OneDrive - Drexel University/Documents - Chang Lab/General/Group/Data/Ultrasound/Layered Electrode Study/"
-data_dir = "/Users/michael/Library/CloudStorage/OneDrive-DrexelUniversity/Documents - Chang Lab/General/Individual/Andre Tayamen/Data/Acoustics/AT_EUM_002/"
+data_dir = "/Users/michael/OneDrive - Drexel University/Documents - Chang Lab/General/Individual/Andre Tayamen/Data/Acoustics/AT_EUM_002/"
 data_file = "AT_EUM_002_01_dX-55_dZ-28_step_0p5.sqlite3"
+
+'''
+ dx - x   dz - y  dx/step + 1, same for dz.  !! PlotScanWaveforms() !!
+'''
+
+temp_data = "/Users/michael/Documents/Programming/tempLab/AT_EUM_002_02_dX-55_dZ-28_step_0p5.sqlite3"
 
 class ReferenceWave:
     def __init__(self, file=data_file, dir=data_dir):
@@ -19,22 +25,27 @@ class ReferenceWave:
         self.waveArr = self.PickleReferenceWave()
 
     def PlotWave(self):
+
         fig, ax = plt.subplots()
         ax.plot(self.waveArr)
         plt.show()
 
-
+# This is it, I got it. Go me. Yippee.
+    # *sqlitetopickle -> plotscanwaveform()
     def PickleReferenceWave(self):
         file = data_dir + data_file
-        pj.sqliteToPickle(file)
-        pickleFile = os.path.splitext(file)[0] + '.pickle'
-        data = pj.loadPickle(pickleFile)
-        plt.plot(data, 'max')
-        return data
+        print(temp_data)
+        pickleFile = os.path.splitext(temp_data)[0] + '.pickle'
+        pickleData = pj.loadPickle(pickleFile) if pj.sqliteToPickle(temp_data) == -1 else pj.sqliteToPickle(temp_data)
+        # data = pj.loadPickle(pickleFile)
+        pickleLength = len(pickleData) - 3
+        coor1 = (1, 0)
+        coor2 = (pickleData[pickleLength]['X'], pickleData[pickleLength]['Z'])
+        coors = [coor1, coor2]
+        pj.plotScanWaveforms(pickleData, coors)
+
 
     def GetRefereneceWave(self):
-
-
         connection = sqlite3.connect(self.data)
         cursor = connection.cursor()
         query = """SELECT name FROM sqlite_master WHERE type='table'"""

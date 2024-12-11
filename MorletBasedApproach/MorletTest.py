@@ -11,23 +11,41 @@ from AssortedGAStuff import *
 
 
 def Test():
+    '''
+    ###
     TestMor = Morlet(5, 2, np.linspace(-10, 10, 1000), 2)
     TestMor.GraphMorlet(1)
+    ###
+    '''
 
+    '''
+    ###
     TestWave = GeneratedWave(5, 800, 200, 600)
     TestWave.PlotMorletMatrix()
+    ###
+    '''
+    '''
+    ###
     SquishedArr = TestWave.CombineMorlets()
     fig, ax = plt.subplots()
     ax.plot(SquishedArr)
-    plt.show()
+    ###
+    '''
+    #plt.show()
+    '''
+    ###
     TestWave.Mutate(0, 'ShiftOmega')
     SquishedArr = TestWave.CombineMorlets()
     fig, ax = plt.subplots()
     ax.plot(SquishedArr)
-    plt.show()
+    ###
+    '''
+    #plt.show()
 
+    ### We picklin
     TestRef = ReferenceWave()
-    TestRef.PlotWave()
+    # TestRef.PlotWave()
+    ###
 
 
 def main():
