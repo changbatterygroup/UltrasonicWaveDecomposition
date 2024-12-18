@@ -2,6 +2,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import random
 
+'''
+General class for morlet definition
+'''
+
+
+'''
+@TODO: Implement GA (Basic addition)
+ - Extract time scale from reference
+ - First order of business is aligning the generated morlets with the reference. 
+ - visualize (plot each generation)
+ - So step one: Generate 5 morlets with various start times (this example takes the form of a morlet so just operate on one)
+ - In theory, the one closest aligned with reference should be the most fit. We'll see. 
+ NOTE: May need to alter morlet generation to fit the pickle formatting. Again, we'll see. 
+'''
+
 
 class Morlet:
     def __init__(self, omega, amp, total_travel, width):
@@ -30,12 +45,16 @@ class Morlet:
 
     #TODO: Symmetric modulations
     def IncreaseAmplitude(self, amount):
+        newMorlet = self
         self.amp += amount
-        pass
+        newMorlet.amp += amount
+        return newMorlet
 
     def ShiftOmega(self, direction, amount):
+        newMorlet = self
         self.omega += amount
-        #Shift center
+        newMorlet.omega += amount
+        return newMorlet        #Shift center
 
     def ChangeFrequency(self):
         #Frequency
@@ -48,7 +67,7 @@ class Morlet:
         n = len(self.wavelet)
         modulation_function = np.linspace(0, 1, n // 2)
         self.wavelet[: (n // 2)] *= modulation_function
-        return self.wavelet
+        return self
 
     def ShrinkRight(self):
         pass

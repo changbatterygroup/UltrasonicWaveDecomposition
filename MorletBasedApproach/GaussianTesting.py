@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from SamUtils import *
 
+'''
+Experimenting with using Gaussians instead of Morlets. This will be helpful for working with Sam as we progress. 
+'''
 def PlotCenteredGaussian(amp, x, sig):
     wave = np.array(range(0, x))
     gaussian = generateGaussian(amp, len(wave) / 2, sig, wave)

@@ -5,7 +5,9 @@ import numpy as np
 import pickleJar as pj
 import os.path
 
-
+'''
+Class defining and analyzing the reference wave
+'''
 
 #data_dir = "/Users/michael/OneDrive - Drexel University/Documents - Chang Lab/General/Group/Data/Ultrasound/Layered Electrode Study/"
 data_dir = "/Users/michael/OneDrive - Drexel University/Documents - Chang Lab/General/Individual/Andre Tayamen/Data/Acoustics/AT_EUM_002/"
@@ -43,6 +45,18 @@ class ReferenceWave:
         coor2 = (pickleData[pickleLength]['X'], pickleData[pickleLength]['Z'])
         coors = [coor1, coor2]
         pj.plotScanWaveforms(pickleData, coors)
+        maxTime = 0
+        for i, data in enumerate(pickleData):
+            if isinstance(data, int) :
+                timeLength = len(pickleData[data]['time']) - 1
+                if maxTime < pickleData[data]['time'][timeLength]:
+                    maxTime = pickleData[data]['time'][timeLength]
+        print(pickleData[1]['time'][0])
+        print(maxTime - pickleData[1]['time'][0])
+        self.startTime = pickleData[1]['time'][0]
+        self.endTime = maxTime
+        print(pickleData[1]['voltage'].shape)
+        return pickleData[0]
 
 
     def GetRefereneceWave(self):
@@ -62,7 +76,13 @@ class ReferenceWave:
         return waveMatrix[0]
 
     def GetFullLength(self):
-        return 800
+        return ((self.endTime - self.startTime) / 2) + 1
+
+    def GetStart(self):
+        return self.startTime
+
+    def GetEnd(self):
+        return self.endTime
 
     def GetStartXCoord(self):
         for x, y in enumerate(self.waveArr):

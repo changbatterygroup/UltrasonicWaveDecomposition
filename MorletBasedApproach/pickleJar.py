@@ -849,7 +849,6 @@ def plotScanWaveforms(dataDict : dict, coors : list, xDat = 'time', yDat = 'volt
 
     # gather waveform data
     waveDat = scanDataAtPixels(dataDict, [xDat, yDat], coors)
-
     # plot
     for coor in coors:
         plt.plot(waveDat[coor][xDat], waveDat[coor][yDat])

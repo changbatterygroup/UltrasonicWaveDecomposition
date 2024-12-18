@@ -9,6 +9,9 @@ import numpy as np
 from scipy.signal import correlate
 from AssortedGAStuff import *
 
+'''
+'Main' for testing purposes. 
+'''
 
 def Test():
     '''
@@ -44,8 +47,20 @@ def Test():
 
     ### We picklin
     TestRef = ReferenceWave()
-    # TestRef.PlotWave()
-    ###
+
+    xTot = int(TestRef.GetFullLength())
+    xStart = TestRef.GetStart()
+    xEnd =  TestRef.GetEnd()
+
+    # @TODO: Automatically determine omega, width, amp
+  #  FirstGen = CreateFirstGen(TestRef)
+  #  for iteration in FirstGen:
+  #      iteration.PlotMorletMatrix()
+
+    GALoop(TestRef)
+       # print(FitnessTest(iteration, TestRef))
+    #FirstGen.GraphMorlet(1)
+    plt.show()
 
 
 def main():
