@@ -22,14 +22,16 @@ def CreateFirstGen(ref, size=5):
 
     gen1 = []
     for i in range(0, size):
-        firstX = xStart + ((xTot / (size + 1)) * (i + 1))
-        lastX = firstX + 100
-        gen1.append(GeneratedWave(1, xTot, firstX, lastX, xStart))
+        firstX = ref.GetStartXCoord() * ((i / 100) + 1)
+                #xStart + ((xTot / (size + 1)) * (i + 1)))
+        lastX = ref.GetEndXCoord()
+        gen1.append(GeneratedWave(1, int(((xEnd + 2) - xStart) / 2), firstX, lastX, xStart, xEnd))
                   #  Morlet(omega, 2, np.linspace(xStart, xEnd, xTot), 100))
 
     highScoreInd = 0
     for i, ind in enumerate(gen1):
-        NotSuperEfficentFitTest(ind, ref, xStart, xEnd)
+        ind.PlotMorletMatrix()
+        ind.NotSuperEfficentFitTest(ref, xStart, xEnd)
         if gen1[i].score > gen1[highScoreInd].score:
             highScoreInd = i
 
@@ -43,41 +45,31 @@ def GALoop(ref, genSize=5):
 
     highScoreInd = 0
     for i, ind in enumerate(singleGen):
-        NotSuperEfficentFitTest(ind, ref, xStart, xEnd)
+        ind.NotSuperEfficentFitTest(ref, xStart, xEnd)
         if singleGen[i].score > singleGen[highScoreInd].score:
             highScoreInd = i
+    singleGen[highScoreInd].PlotMorletMatrix()
 
     for i in range(0, 80):
         HighScorer = singleGen[highScoreInd]
-        if HighScorer.score > 900:
+        if HighScorer.score > 999:
             print("Close match found!")
             break
         singleGen.clear()
         for j in range(0, genSize):
             firstX = HighScorer.firstX
             lastX = firstX + 100
-            mutatedInd = HighScorer.Mutate(0, random.Random().randint(1, 3))
+            mutatedInd = HighScorer.Mutate(0, random.Random().randint(2, 4))
             print(mutatedInd.tag)
             singleGen.append(mutatedInd)
         for k, ind in enumerate(singleGen):
-            NotSuperEfficentFitTest(ind, ref, xStart, xEnd)
+            ind.NotSuperEfficentFitTest(ref, xStart, xEnd)
             print(ind.tag)
             if singleGen[k].score > singleGen[highScoreInd].score:
                 highScoreInd = k
         if i % 10 == 0:
-            for j in singleGen:
-                j.PlotMorletMatrix()
+            singleGen[highScoreInd].PlotMorletMatrix()
 
-def NotSuperEfficentFitTest(individual : GeneratedWave, reference : ReferenceWave, xStart, xEnd):
-    score = 0
-    for i in (range(0, 1000)):
-        if i != 1000:
-            indVal = int(individual.MorletMatrix[0][i])
-            refVal = int(reference.waveArr['voltage'][i])
-            if indVal == refVal:
-                score += 1
-    individual.SetScore(score)
-    print(score)
 
 def FitnessTest(individual : GeneratedWave, reference : ReferenceWave):
 

@@ -15,6 +15,9 @@ General class for morlet definition
  - So step one: Generate 5 morlets with various start times (this example takes the form of a morlet so just operate on one)
  - In theory, the one closest aligned with reference should be the most fit. We'll see. 
  NOTE: May need to alter morlet generation to fit the pickle formatting. Again, we'll see. 
+ 
+ 
+ Make sure the wavelet addition function works
 '''
 
 
@@ -48,13 +51,27 @@ class Morlet:
         newMorlet = self
         self.amp += amount
         newMorlet.amp += amount
+        newMorlet.wavelet = newMorlet.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
+        return newMorlet
+
+    def DecreaseAmplitude(self, amount):
+        newMorlet = self
+        self.amp -= amount
+        newMorlet.amp -= amount
+        newMorlet.wavelet = newMorlet.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
         return newMorlet
 
     def ShiftOmega(self, direction, amount):
         newMorlet = self
-        self.omega += amount
-        newMorlet.omega += amount
-        return newMorlet        #Shift center
+        if direction == 1:
+            self.omega += amount
+            newMorlet.omega += amount
+        elif direction == 2:
+            self.omega -= amount
+            newMorlet.omega -= amount
+        newMorlet.wavelet = newMorlet.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
+        return newMorlet
+        #Shift center
 
     def ChangeFrequency(self):
         #Frequency
@@ -63,11 +80,13 @@ class Morlet:
 
     #TODO: Asymmetric modulations
 
-    def ShrinkLeft(self):
+    def ShrinkLeft(self, refStart, refStop):
         n = len(self.wavelet)
-        modulation_function = np.linspace(0, 1, n // 2)
+        modulation_function = np.linspace(refStart, refStop, n // 2)
         self.wavelet[: (n // 2)] *= modulation_function
+        #self.wavelet = self.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
         return self
+
 
     def ShrinkRight(self):
         pass

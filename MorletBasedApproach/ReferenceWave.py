@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickleJar as pj
 import os.path
+import math
 
 '''
 Class defining and analyzing the reference wave
@@ -27,7 +28,6 @@ class ReferenceWave:
         self.waveArr = self.PickleReferenceWave()
 
     def PlotWave(self):
-
         fig, ax = plt.subplots()
         ax.plot(self.waveArr)
         plt.show()
@@ -79,21 +79,31 @@ class ReferenceWave:
         return ((self.endTime - self.startTime) / 2) + 1
 
     def GetStart(self):
-        return self.startTime
+        return self.waveArr['time'][0]
 
     def GetEnd(self):
         return self.endTime
 
     def GetStartXCoord(self):
-        for x, y in enumerate(self.waveArr):
-            if y > 0.01:
-                return x
+        for x, y in enumerate(self.waveArr['voltage']):
+            try:
+                y = float(y)
+            except Exception:
+                pass
+            if isinstance(y, float) :
+                if math.floor(y) >= 1:
+                    return self.waveArr['time'][x]
         print("Get X Coord failed.")
 
     def GetEndXCoord(self):
-        for x, y in enumerate(self.waveArr):
-            if y > 0.01:
-                return x
+        for x, y in enumerate(reversed(self.waveArr['voltage'])):
+            try:
+                y = float(y)
+            except Exception:
+                pass
+            if isinstance(y, float):
+                if math.floor(y) >= 1:
+                    return self.waveArr['time'][x]
         print("Get X Coord failed.")
 
     #TODO: Get the length, start point, and end point of the wave
