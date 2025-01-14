@@ -16,6 +16,7 @@ Class for an automatically generated wave.
 # @TODO: time array
 
 
+# @TODO: clean up and document these class members. A lot of them are extremely similar and their specifics need to be more clear.
 class GeneratedWave:
     def __init__(self, layers, xLen, firstX, lastX, refStart=0, xEnd=1000):
         self.lastX = lastX
@@ -99,7 +100,6 @@ class GeneratedWave:
            #     self.MorletMatrix, self.MorletArr = mutatedWave.GenerateMorletMatrix(mutatedWave.layers, mutatedWave.xLen,
                                                              #       mutatedWave.firstX, mutatedWave.lastX,
                                                             #        mutatedWave.refStart)
-
                 return mutatedWave
 
     def NotSuperEfficentFitTest(self, reference: ReferenceWave, xStart, xEnd):
