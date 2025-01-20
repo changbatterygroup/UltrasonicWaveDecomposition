@@ -17,6 +17,32 @@ Class for an automatically generated wave.
 
 
 # @TODO: clean up and document these class members. A lot of them are extremely similar and their specifics need to be more clear.
+'''
+members - 
+Actually maybe a 
+ - One for first value of actual wave
+ - One for first x (time)
+ - One for last x (time)
+ - Morlet matrix - linear combo of all morlets x time
+    - Function to derive time(?)
+ - Morlet array - array of individual morlets 
+ - 
+ 
+ 
+lastX
+firstX
+xLen
+layers
+refStart
+xEnd
+MorletMatrix
+MorletArr
+TimeArr
+MorSum
+score
+tag
+'''
+
 class GeneratedWave:
     def __init__(self, layers, xLen, firstX, lastX, refStart=0, xEnd=1000):
         self.lastX = lastX
@@ -96,7 +122,6 @@ class GeneratedWave:
                 randDir = Random().randint(1, 2)
                 mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].ShiftOmega(randDir, randAmount)
                 mutatedWave.tag = "Generated from mutation function"
-
            #     self.MorletMatrix, self.MorletArr = mutatedWave.GenerateMorletMatrix(mutatedWave.layers, mutatedWave.xLen,
                                                              #       mutatedWave.firstX, mutatedWave.lastX,
                                                             #        mutatedWave.refStart)

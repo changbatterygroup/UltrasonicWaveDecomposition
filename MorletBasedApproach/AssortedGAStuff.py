@@ -60,11 +60,9 @@ def GALoop(ref, genSize=5):
             firstX = HighScorer.firstX
             lastX = firstX + 100
             mutatedInd = HighScorer.Mutate(0, random.Random().randint(2, 4))
-            print(mutatedInd.tag)
             singleGen.append(mutatedInd)
         for k, ind in enumerate(singleGen):
             ind.NotSuperEfficentFitTest(ref, xStart, xEnd)
-            print(ind.tag)
             if singleGen[k].score > singleGen[highScoreInd].score:
                 highScoreInd = k
         if i % 10 == 0:
