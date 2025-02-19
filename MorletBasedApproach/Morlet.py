@@ -23,6 +23,14 @@ General class for morlet definition
 
 class Morlet:
     def __init__(self, omega, amp, total_travel, width):
+        """
+
+        :param omega: Center of the morlet
+        :param int amp: Amplitude at center of morlet
+        :param total_travel: Evenly spaced array over the travel time of the reference
+        :type total_travel: np.linspace
+        :param int width: Width. Duh.
+        """
         self.omega = omega
         self.total_travel = total_travel
         self.width = width

@@ -43,6 +43,7 @@ def GALoop(ref, genSize=5):
     xEnd = int(ref.GetEnd())
     singleGen = CreateFirstGen(ref, genSize)
 
+    # Determine most fit individual from previous gen
     highScoreInd = 0
     for i, ind in enumerate(singleGen):
         ind.NotSuperEfficentFitTest(ref, xStart, xEnd)

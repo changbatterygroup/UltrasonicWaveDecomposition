@@ -19,28 +19,26 @@ Class for an automatically generated wave.
 # @TODO: clean up and document these class members. A lot of them are extremely similar and their specifics need to be more clear.
 '''
 members - 
-Actually maybe a 
+ - layers: Number of layers
+ - center: Center position of the wave
+ - MorletMatrix: Array of all morlets in the wave as numerical values
+ - MorletArr: Array of all morlets 
+ - MorSum: 
+ - score: 
+ - tag: 
+ - startTime:
+ - endTime: 
+  
+  pass the reference time array and extract necessary info
+  
  - One for first value of actual wave
  - One for first x (time)
  - One for last x (time)
  - Morlet matrix - linear combo of all morlets x time
     - Function to derive time(?)
  - Morlet array - array of individual morlets 
- - 
  
- 
-lastX
-firstX
-xLen
-layers
-refStart
-xEnd
-MorletMatrix
-MorletArr
-TimeArr
-MorSum
-score
-tag
+
 '''
 
 class GeneratedWave:
@@ -51,7 +49,7 @@ class GeneratedWave:
         self.layers = layers
         self.refStart = refStart
         self.xEnd = xEnd
-        self.MorletMatrix, self.MorletArr, self.TimeArr = self.GenerateMorletMatrix(layers, xLen, firstX, lastX, refStart, xEnd)
+        self.MorletMatrix, self.MorletArr = self.GenerateMorletMatrix(layers, xLen, firstX, lastX, refStart, xEnd)
         self.MorSum = self.CombineMorlets()
         self.score = 0
         self.tag = "Made from constructor"
@@ -59,20 +57,16 @@ class GeneratedWave:
 
     def GenerateMorletMatrix(self, layers, xLen, firstX, lastX, refStart, xEnd):
         morMatrix = np.zeros((layers, xLen))
-        #np.array((range(refStart, refStart + xLen), (range(1, layers)))))
         morArr = []
         for n in range(0, layers):
-           # width = (lastX - firstX)/(layers + 2)
-            timeArr = np.linspace(refStart, xEnd, 1000)
+            timeArr = np.linspace(refStart, xEnd, 1000) # this can be referenced from the wavelet
             morArr.append(Morlet(firstX, 20, timeArr, 50))
-                # refStart, refStart + xLen, 1000), 50))
-
             morMatrix[n, :] = morArr[n].wavelet
-        return morMatrix, morArr, timeArr
+        return morMatrix, morArr
 
     def RegenerateMatrix(self):
         for n in range(0, self.layers):
-            self.MorletMatrix[n, :] = self.MorletArr[n].wavelet
+            self.MorletMatrix[n] = self.MorletArr[n].wavelet
 
 
     def PlotMorletMatrix(self):
@@ -102,7 +96,7 @@ class GeneratedWave:
             case 2:
                 mutatedWave = self
                 randAmount = Random().randint(1, 5)
-                mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].IncreaseAmplitude(randAmount / 100)
+                mutatedWave.MorletArr[index].wavelet = mutatedWave.MorletArr[index].IncreaseAmplitude(100 / randAmount)
                 mutatedWave.tag = "Generated from mutation function"
 
               #  self.MorletMatrix, self.MorletArr = mutatedWave.GenerateMorletMatrix(mutatedWave.layers, mutatedWave.xLen,
@@ -112,7 +106,7 @@ class GeneratedWave:
             case 3:
                 mutatedWave = self
                 randAmount = Random().randint(1, 5)
-                mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].DecreaseAmplitude(randAmount / 100)
+                mutatedWave.MorletArr[index].wavelet = mutatedWave.MorletArr[index].DecreaseAmplitude(100 / randAmount)
                 mutatedWave.tag = "Generated from mutation function"
                 return mutatedWave
 
@@ -120,7 +114,7 @@ class GeneratedWave:
                 mutatedWave = self
                 randAmount = Random().randint(10, 50)
                 randDir = Random().randint(1, 2)
-                mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].ShiftOmega(randDir, randAmount)
+                mutatedWave.MorletArr[index].wavelet = mutatedWave.MorletArr[index].ShiftOmega(randDir, randAmount)
                 mutatedWave.tag = "Generated from mutation function"
            #     self.MorletMatrix, self.MorletArr = mutatedWave.GenerateMorletMatrix(mutatedWave.layers, mutatedWave.xLen,
                                                              #       mutatedWave.firstX, mutatedWave.lastX,
