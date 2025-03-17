@@ -1,3 +1,4 @@
+import copy
 import random
 
 import matplotlib.pyplot as plt
@@ -16,24 +17,14 @@ Genetic algorithm specific code, including fitness tests, mutation generation, e
 '''
 
 def CreateFirstGen(ref, size=5):
-    xTot = int(ref.GetFullLength())
     xStart = int(ref.GetStart())
     xEnd = int(ref.GetEnd())
-
+    timeArr = ref.GetTimeArr()
     gen1 = []
-    for i in range(0, size):
-        firstX = ref.GetStartXCoord() * ((i / 100) + 1)
-                #xStart + ((xTot / (size + 1)) * (i + 1)))
-        lastX = ref.GetEndXCoord()
-        gen1.append(GeneratedWave(1, int(((xEnd + 2) - xStart) / 2), firstX, lastX, xStart, xEnd))
-                  #  Morlet(omega, 2, np.linspace(xStart, xEnd, xTot), 100))
 
-    highScoreInd = 0
-    for i, ind in enumerate(gen1):
-        ind.PlotMorletMatrix()
-        ind.NotSuperEfficentFitTest(ref, xStart, xEnd)
-        if gen1[i].score > gen1[highScoreInd].score:
-            highScoreInd = i
+    for i in range(0, size):
+        center = ref.GetStartXCoord() * ((i / 100) + 1)
+        gen1.append(GeneratedWave(1, center, timeArr))
 
     return gen1
 
@@ -46,9 +37,11 @@ def GALoop(ref, genSize=5):
     # Determine most fit individual from previous gen
     highScoreInd = 0
     for i, ind in enumerate(singleGen):
+      #  ind.PlotMorletMatrix()
         ind.NotSuperEfficentFitTest(ref, xStart, xEnd)
         if singleGen[i].score > singleGen[highScoreInd].score:
             highScoreInd = i
+    print("Most fit gen1:", highScoreInd)
     singleGen[highScoreInd].PlotMorletMatrix()
 
     for i in range(0, 80):
@@ -56,18 +49,22 @@ def GALoop(ref, genSize=5):
         if HighScorer.score > 999:
             print("Close match found!")
             break
-        singleGen.clear()
+        singleGen = []
         for j in range(0, genSize):
-            firstX = HighScorer.firstX
-            lastX = firstX + 100
-            mutatedInd = HighScorer.Mutate(0, random.Random().randint(2, 4))
+            mutation = random.Random().randint(1, 4)
+            mutantID = (i*100) + (j * 10) + mutation
+            mutatedInd = copy.deepcopy(HighScorer).Mutate(0, mutation, mutantID)
             singleGen.append(mutatedInd)
+            print(f"Mutation ({j}): {mutation}")
         for k, ind in enumerate(singleGen):
             ind.NotSuperEfficentFitTest(ref, xStart, xEnd)
+            print(f"Tag:", ind.tag)
             if singleGen[k].score > singleGen[highScoreInd].score:
                 highScoreInd = k
         if i % 10 == 0:
-            singleGen[highScoreInd].PlotMorletMatrix()
+            for ind in singleGen:
+                ind.PlotMorletMatrix()
+        print(f"Most fit gen{i}: {highScoreInd}")
 
 
 def FitnessTest(individual : GeneratedWave, reference : ReferenceWave):

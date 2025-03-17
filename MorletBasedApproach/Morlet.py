@@ -88,9 +88,9 @@ class Morlet:
 
     #TODO: Asymmetric modulations
 
-    def ShrinkLeft(self, refStart, refStop):
+    def ShrinkLeft(self):
         n = len(self.wavelet)
-        modulation_function = np.linspace(refStart, refStop, n // 2)
+        modulation_function = np.linspace(self.total_travel[0], self.total_travel[-1], n // 2)
         self.wavelet[: (n // 2)] *= modulation_function
         #self.wavelet = self.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
         return self

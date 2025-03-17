@@ -1,0 +1,14 @@
+ToDo -
+Current issue: accuracy is not improving in each generation
+    Solutions-
+        - Improve variety of mutation functions & decrease impact of each one
+        - Make the fitness test more forgiving (maybe with a tenth or hundredth margin of error?)
+            - Make the fitness test test for things like max height, number of local extrema, start and stop points, etc.
+            - Reference wave analysis that includes these values in the beginning
+        - Implement crossover
+        - Increase individuals per generation
+        - Increase number of surviving individuals
+
+
+Optimizations to make:
+    - Make a general mutate function and pass a reference to the mutation function to use based on the random mutation value

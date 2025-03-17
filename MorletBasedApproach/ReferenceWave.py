@@ -2,9 +2,14 @@ import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from pywt import threshold
+from scipy.ndimage import median_filter
+from scipy.signal import find_peaks
+import Wave
 import pickleJar as pj
 import os.path
 import math
+import scipy
 
 '''
 Class defining and analyzing the reference wave
@@ -20,16 +25,27 @@ data_file = "AT_EUM_002_01_dX-55_dZ-28_step_0p5.sqlite3"
 
 temp_data = "/Users/michael/Documents/Programming/tempLab/AT_EUM_002_02_dX-55_dZ-28_step_0p5.sqlite3"
 
+'''
+Reference wave analysis
+    Values to scan for: 
+        - Number of local extrema
+        - min/max y values
+        - Start and stop times
+'''
 class ReferenceWave:
     def __init__(self, file=data_file, dir=data_dir):
         self.data_dir = dir
         self.file = file
         self.data = self.data_dir + self.file
         self.waveArr = self.PickleReferenceWave()
+        self.max_voltage, self.min_voltage = None, None
+        self.num_local_maxima, self.num_local_minima = None, None
+        self.first_time_index, self.last_time_index = None, None
+        self.AnalyzeReferenceWave()
 
     def PlotWave(self):
         fig, ax = plt.subplots()
-        ax.plot(self.waveArr)
+        ax.plot(self.waveArr['time'], self.waveArr['voltage'])
         plt.show()
 
 # This is it, I got it. Go me. Yippee.
@@ -55,7 +71,6 @@ class ReferenceWave:
         print(maxTime - pickleData[1]['time'][0])
         self.startTime = pickleData[1]['time'][0]
         self.endTime = maxTime
-        print(pickleData[1]['voltage'].shape)
         return pickleData[0]
 
 
@@ -74,6 +89,26 @@ class ReferenceWave:
             waveMatrix[i, :] = wave
 
         return waveMatrix[0]
+
+    def AnalyzeReferenceWave(self):
+        # Local extrema
+        self.num_local_maxima = Wave.FindLocalMaxima(self.waveArr['voltage'])
+        self.num_local_minima = Wave.FindLocalMinima(self.waveArr['voltage'])
+
+        # Max y value
+        self.max_voltage = Wave.FindMaxY(self.waveArr['voltage'])
+
+        # Min y value
+        self.min_voltage = Wave.FindMinY(self.waveArr['voltage'])
+
+        # First x coord
+        self.first_time_index = Wave.FindFirstX(self.waveArr['voltage'])
+
+        # last x coord
+        self.last_time_index = Wave.FindLastX(self.waveArr['voltage'])
+
+    def GetTimeArr(self):
+        return self.waveArr['time']
 
     def GetFullLength(self):
         return ((self.endTime - self.startTime) / 2) + 1
