@@ -43,7 +43,7 @@ class GeneratedWave:
         self.MorSum = self.CombineMorlets()
         self.score = 0
         self.tag = "Made from constructor"
-        self.FitnessDetails = {'extrema': False, 'extrema_diff': 0, 'invert': False, 'time': False, 'time_diff': 0, 'voltage': False, 'voltage_diff': 0, 'mutations': [1, 2, 3, 4]}
+        self.FitnessDetails = {'extrema': False, 'extrema_diff': 0, 'invert': False, 'time': False, 'time_diff': 0, 'voltage': False, 'voltage_diff': 0, 'mutations': [1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
     def GenerateMorletMatrix(self, center, timeArr):
         morArr = []
@@ -70,32 +70,63 @@ class GeneratedWave:
     def SetScore(self, score):
         self.score = score
 
-    def Mutate(self, index, mutation, mutantID):
+    def Mutate(self, index, mutantID, reference):
         mutation = choice(self.FitnessDetails['mutations'])
+        print(f"Mutation ({mutantID}): {mutation}")
         match mutation:
             case 1:
                 mutatedWave = self
-                mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].ShrinkLeft()
+                mutatedWave.MorletArr[index] = self.MorletArr[index].ShrinkLeft()
                 mutatedWave.tag = mutantID
                 return mutatedWave
             case 2:
                 mutatedWave = self
                 randAmount = Random().randint(1, 5)
-                mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].IncreaseAmplitude(self.FitnessDetails['voltage_diff'])
+                mutatedWave.MorletArr[index] = self.MorletArr[index].IncreaseAmplitude(self.FitnessDetails['voltage_diff'])
                 mutatedWave.tag = mutantID
                 return mutatedWave
             case 3:
                 mutatedWave = self
                 randAmount = Random().randint(1, 5)
-                mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].DecreaseAmplitude(self.FitnessDetails['voltage_diff'])
+                mutatedWave.MorletArr[index] = self.MorletArr[index].DecreaseAmplitude(self.FitnessDetails['voltage_diff'])
                 mutatedWave.tag = mutantID
                 return mutatedWave
 
             case 4:
                 mutatedWave = self
-                randAmount = Random().randint(10, 50)
+                randAmount = Random().randint(5, 50)
                 randDir = Random().randint(1, 2)
-                mutatedWave.MorletArr[index] = mutatedWave.MorletArr[index].ShiftOmega(randDir, randAmount)
+                mutatedWave.MorletArr[index] = self.MorletArr[index].ShiftOmega(randDir, randAmount)
+                mutatedWave.tag = mutantID
+                return mutatedWave
+
+            case 5:
+                mutatedWave = self
+                mutatedWave.MorletArr[index] = self.MorletArr[index].ShrinkRight()
+                mutatedWave.tag = mutantID
+                return mutatedWave
+
+            case 6:
+                mutatedWave = self
+                mutatedWave.MorletArr[index] = self.MorletArr[index].ApplyParabola(reference)
+                mutatedWave.tag = mutantID
+                return mutatedWave
+
+            case 7:
+                mutatedWave = self
+                mutatedWave.MorletArr[index] = self.MorletArr[index].ApplyNegativeParabola(reference)
+                mutatedWave.tag = mutantID
+                return mutatedWave
+
+            case 8:
+                mutatedWave = self
+                mutatedWave.MorletArr[index] = self.MorletArr[index].ShaveEnd(reference)
+                mutatedWave.tag = mutantID
+                return mutatedWave
+
+            case 9:
+                mutatedWave = self
+                mutatedWave.MorletArr[index] = self.MorletArr[index].ShaveFront(reference)
                 mutatedWave.tag = mutantID
                 return mutatedWave
 
@@ -113,7 +144,9 @@ class GeneratedWave:
                 indVal = math.floor(self.MorletArr[0].wavelet[i])
                 refVal = math.floor(reference.waveArr['voltage'][i])
                 if indVal == refVal and indVal != 0 and refVal != 0:
-                    equality_score += 1
+                    equality_score += (1 - abs(self.MorletArr[0].wavelet[i] - reference.waveArr['voltage'][i]))
+                elif indVal != refVal and indVal != 0 and refVal != 0:
+                    equality_score -= 2
 
         # Extrema Test
         ref_minima = reference.num_local_minima
@@ -122,11 +155,23 @@ class GeneratedWave:
         ind_maxima = Wave.FindLocalMaxima(self.MorletArr[0].wavelet)
         if ref_maxima == ind_maxima and ref_minima == ind_minima:
             self.FitnessDetails['extrema'] = True
+        elif ref_maxima != ind_maxima or ref_minima != ind_minima:
+            self.FitnessDetails['extrema'] = False
         elif ref_maxima == ind_minima and ref_minima == ind_maxima:
             self.FitnessDetails['invert'] = True
 
         self.FitnessDetails['extrema_diff'] = (ref_minima - ind_minima) + (ref_maxima - ind_maxima)
-        extrema_score = 50 - ((abs(ref_minima - ind_minima)) + (abs(ref_maxima - ind_maxima)))
+        extrema_score = 5*(5 - ((abs(ref_minima - ind_minima)) + (abs(ref_maxima - ind_maxima))))
+
+        volt_max_temp_score = 0
+        for volt in reference.maxima:
+            volt_max_temp_score += (abs(reference.waveArr['voltage'][volt] - self.MorletArr[0].wavelet[volt]))
+        extrema_score += (100 - (5 * volt_max_temp_score))
+
+        volt_min_temp_score = 0
+        for volt in reference.minima:
+            volt_min_temp_score += (abs(reference.waveArr['voltage'][volt] - self.MorletArr[0].wavelet[volt]))
+        extrema_score += (100 - (5 * volt_min_temp_score))
 
         # Voltage Test
         ref_max = reference.max_voltage
@@ -134,7 +179,8 @@ class GeneratedWave:
         ind_max = Wave.FindMaxY(self.MorletArr[0].wavelet)
         ind_min = Wave.FindMinY(self.MorletArr[0].wavelet)
 
-        self.FitnessDetails['voltage_diff'] = (ref_max - ind_max) + (ref_min - ind_min)
+        self.FitnessDetails['voltage_diff'] = ref_max / ind_max
+        self.FitnessDetails['voltage'] = self.FitnessDetails['voltage_diff'] == 1
         voltage_score = 50 - ((abs(ref_max - ind_max)) + (abs(ref_min - ind_min)))
 
         # Time Test
@@ -143,7 +189,8 @@ class GeneratedWave:
         ind_start = Wave.FindFirstX(self.MorletArr[0].wavelet)
         ind_stop = Wave.FindLastX(self.MorletArr[0].wavelet)
 
-        self.FitnessDetails['time_diff'] = (ref_start - ind_start) + (ref_stop - ind_stop)
+        self.FitnessDetails['time_diff'] = (ref_start - ind_start)
+        self.FitnessDetails['time'] = math.floor(self.FitnessDetails['time_diff']) == 0
         time_score = 50 - ((abs(ref_start - ind_start)) + (abs(ref_stop - ind_stop)))
 
         score = equality_score + extrema_score + voltage_score + time_score
@@ -152,9 +199,15 @@ class GeneratedWave:
         print(score)
 
     def SetMutations(self):
-        if self.FitnessDetails['extrema'] and 1 in self.FitnessDetails['mutations'] : self.FitnessDetails['mutations'].remove(1)
-        if self.FitnessDetails['time'] and 2 in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].remove(2)
+        if self.FitnessDetails['extrema'] and 8 in self.FitnessDetails['mutations'] : self.FitnessDetails['mutations'].remove(8)
+        elif not self.FitnessDetails['extrema'] and 8 not in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].append(8)
+        if self.FitnessDetails['voltage'] and 2 in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].remove(2)
+        elif not self.FitnessDetails['voltage'] and 2 not in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].append(2)
         if self.FitnessDetails['voltage'] and 3 in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].remove(3)
+        elif not self.FitnessDetails['voltage'] and 3 not in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].append(3)
+        if self.FitnessDetails['time'] and 4 in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].remove(4)
+        elif not self.FitnessDetails['time'] and 4 not in self.FitnessDetails['mutations']: self.FitnessDetails['mutations'].append(4)
+
         if self.FitnessDetails['invert']:
             self.FitnessDetails['mutations'].clear()
             self.FitnessDetails['mutations'].append(4)

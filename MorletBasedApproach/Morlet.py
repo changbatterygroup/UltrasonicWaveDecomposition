@@ -1,6 +1,9 @@
+import math
+
 import numpy as np
 import matplotlib.pyplot as plt
-from random import random
+import random
+import Wave
 
 '''
 General class for morlet definition
@@ -22,8 +25,16 @@ General class for morlet definition
 
 
 class Morlet:
+    """
+    Summary:
+
+    Description:
+    """
     def __init__(self, omega, amp, total_travel, width):
         """
+        Summary:
+
+        Description:
 
         :param omega: Center of the morlet
         :param int amp: Amplitude at center of morlet
@@ -42,6 +53,15 @@ class Morlet:
     total_travel - np.linspace representing the total travel time of the reference
     '''
     def GenerateMorlet(self, omega, amp, total_travel, width, alg):
+        """
+
+        :param omega:
+        :param amp:
+        :param total_travel:
+        :param width:
+        :param alg:
+        :return:
+        """
         match alg:
             case 1:
                 return amp * np.cos(5 * (total_travel - omega) / width) * np.exp(-((total_travel - omega) / width) ** 2 / 2) # Change to sin
@@ -49,39 +69,73 @@ class Morlet:
                 return np.real(np.exp(1j*(omega*total_travel)/width) * np.exp(-0.5*(total_travel/width)**2) * np.pi**(-0.25) * np.sqrt(1/width))
 
     def GraphMorlet(self, index):
+        """
+
+        :param index:
+        :return:
+        """
         fig, ax = plt.subplots()
         ax.plot(self.total_travel, self.wavelet, label=f"Constituent #{index}")
         plt.title(f"Constituent #{index}")
         plt.show()
 
+    def GetStartIndex(self):
+        index = np.argmax((self.wavelet > 0.5) | (self.wavelet < -0.5))
+        return index - 10
+
+    def GetEndIndex(self):
+        indices = np.where((self.wavelet > 0.5) | (self.wavelet < -0.5))[0]
+        index = indices[-1] if indices.size > 0 else -1
+        return index + 10
+
     #TODO: Symmetric modulations
     def IncreaseAmplitude(self, amount):
+        """
+
+        :param amount:
+        :return:
+        """
         newMorlet = self
-        self.amp += amount
-        newMorlet.amp += amount
-        newMorlet.wavelet = newMorlet.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
+        newMorlet.amp *= amount
+        newMorlet.wavelet *= amount
         return newMorlet
 
     def DecreaseAmplitude(self, amount):
+        """
+
+        :param amount:
+        :return:
+        """
         newMorlet = self
-        self.amp -= amount
-        newMorlet.amp -= amount
-        newMorlet.wavelet = newMorlet.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
+        self.amp /= amount
+        newMorlet.amp /= amount
+        self.wavelet /= amount
+        newMorlet.wavelet /= amount
         return newMorlet
 
     def ShiftOmega(self, direction, amount):
+        """
+
+        :param direction:
+        :param amount:
+        :return:
+        """
         newMorlet = self
+        center = math.floor((self.omega - min(self.total_travel)) / 2)
         if direction == 1:
-            self.omega += amount
-            newMorlet.omega += amount
+            newMorlet.omega += (amount * 2)
+            newMorlet.wavelet = np.roll(newMorlet.wavelet, amount)
         elif direction == 2:
-            self.omega -= amount
-            newMorlet.omega -= amount
-        newMorlet.wavelet = newMorlet.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
+            newMorlet.omega -= (amount * 2)
+            newMorlet.wavelet = np.roll(newMorlet.wavelet, -1 * amount)
         return newMorlet
         #Shift center
 
     def ChangeFrequency(self):
+        """
+
+        :return:
+        """
         #Frequency
         pass
 
@@ -89,13 +143,66 @@ class Morlet:
     #TODO: Asymmetric modulations
 
     def ShrinkLeft(self):
-        n = len(self.wavelet)
-        modulation_function = np.linspace(self.total_travel[0], self.total_travel[-1], n // 2)
-        self.wavelet[: (n // 2)] *= modulation_function
-        #self.wavelet = self.GenerateMorlet(self.omega, self.amp, self.total_travel, self.width, 1)
-        return self
+        """
+
+        :return:
+        """
+        modFunction = random.randint(1, 20) / 10
+        newMorlet = self
+        center = math.floor(self.GetStartIndex() + ((self.GetEndIndex() - self.GetStartIndex()) / 2))
+        newMorlet.wavelet[:center] = newMorlet.wavelet[:center] / modFunction
+        return newMorlet
 
 
     def ShrinkRight(self):
-        pass
+        """
 
+        :return:
+        """
+        modFunction = random.randint(1, 20) / 10
+        newMorlet = self
+        center = math.floor(self.GetStartIndex() + ((self.GetEndIndex() - self.GetStartIndex()) / 2))
+        newMorlet.wavelet[center:] = newMorlet.wavelet[center:] / modFunction
+        return newMorlet
+
+    def ApplyParabola(self, ref):
+        index = random.choice(Wave.GetLocalMaxima(self.wavelet)[0])
+        waveWidth = self.GetEndIndex() - self.GetStartIndex()
+        width = random.randint(2, 4)
+       # startTime = random.randint(self.GetStartIndex(), self.GetEndIndex() - width)
+        x = np.linspace((-1 * width) / 2, width / 2)
+        y = np.abs(-x ** 2)
+        newMorlet = self
+        startTime = math.floor(index - (len(y) / 2))
+        endTime = math.floor(index + (len(y) / 2))
+        newMorlet.wavelet[startTime:endTime] += y
+        return newMorlet
+
+    def ApplyNegativeParabola(self, ref):
+        index = random.choice(Wave.GetLocalMinima(self.wavelet)[0])
+        waveWidth = self.GetEndIndex() - self.GetStartIndex()
+        width = random.randint(2, 4)
+        #startTime = random.randint(self.GetStartIndex(), self.GetEndIndex() - width)
+        x = np.linspace((-1 * width) / 2, width / 2)
+        y = -x ** 2
+        newMorlet = self
+        startTime = math.floor(index - (len(y) / 2))
+        endTime = math.floor(index + (len(y) / 2))
+        newMorlet.wavelet[startTime:endTime] += y
+        return newMorlet
+
+    def ShaveEnd(self, ref):
+        lastMax = Wave.GetLocalMaxima(self.wavelet)[0][-1]
+        lastMin = Wave.GetLocalMinima(self.wavelet)[0][-1]
+        pos = lastMax > lastMin
+        if pos: self.wavelet[lastMin:] *= 0
+        elif not pos: self.wavelet[lastMax:] *= 0
+        return self
+
+    def ShaveFront(self, ref):
+        firstMax = Wave.GetLocalMaxima(self.wavelet)[0][0]
+        firstMin = Wave.GetLocalMinima(self.wavelet)[0][0]
+        pos = firstMax > firstMin
+        if pos: self.wavelet[:firstMin] *= 0
+        elif not pos: self.wavelet[:firstMax] *= 0
+        return self

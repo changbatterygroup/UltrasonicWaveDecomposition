@@ -41,6 +41,7 @@ class ReferenceWave:
         self.max_voltage, self.min_voltage = None, None
         self.num_local_maxima, self.num_local_minima = None, None
         self.first_time_index, self.last_time_index = None, None
+        self.maxima, self.minima, self.maxima_voltages, self.minima_voltages = None, None, [], []
         self.AnalyzeReferenceWave()
 
     def PlotWave(self):
@@ -94,6 +95,10 @@ class ReferenceWave:
         # Local extrema
         self.num_local_maxima = Wave.FindLocalMaxima(self.waveArr['voltage'])
         self.num_local_minima = Wave.FindLocalMinima(self.waveArr['voltage'])
+        self.maxima = Wave.GetLocalMaxima(self.waveArr['voltage'])[0]
+        self.minima = Wave.GetLocalMinima(self.waveArr['voltage'])[0]
+        for volt in self.maxima: self.maxima_voltages.append(self.waveArr['voltage'][volt])
+        for volt in self.minima: self.minima_voltages.append(self.waveArr['voltage'][volt])
 
         # Max y value
         self.max_voltage = Wave.FindMaxY(self.waveArr['voltage'])
